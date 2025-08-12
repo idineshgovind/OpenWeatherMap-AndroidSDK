@@ -17,7 +17,7 @@ import timber.log.Timber
  */
 class CurrentWeatherViewModel : ViewModel() {
     
-    private val repository = WeatherRepository()
+    private val repository = WeatherRepository.getInstance()
     
     // UI State
     private val _uiState = MutableStateFlow(CurrentWeatherUiState())

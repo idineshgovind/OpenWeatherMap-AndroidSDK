@@ -3,15 +3,23 @@ package com.dineshdev.openweathermap.sample.data.repository
 import com.dineshdev.openweathermap.sdk.OpenWeatherMapSDK
 import com.dineshdev.openweathermap.sdk.data.models.*
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Repository class that wraps the OpenWeatherMap SDK for use in the sample app.
  * This demonstrates how to use the SDK in a clean architecture pattern.
  */
-@Singleton
-class WeatherRepository {
+class WeatherRepository private constructor() {
+    
+    companion object {
+        @Volatile
+        private var INSTANCE: WeatherRepository? = null
+        
+        fun getInstance(): WeatherRepository {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: WeatherRepository().also { INSTANCE = it }
+            }
+        }
+    }
     
     private val sdk: OpenWeatherMapSDK
         get() = OpenWeatherMapSDK.getInstance()

@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -117,22 +118,22 @@ val bottomNavItems = listOf(
     BottomNavItem(
         route = "current_weather",
         titleRes = R.string.nav_current_weather,
-        icon = Icons.Default.WbSunny
+        icon = Icons.Default.Home
     ),
     BottomNavItem(
         route = "forecast",
         titleRes = R.string.nav_forecast,
-        icon = Icons.Default.CalendarToday
+        icon = Icons.Default.DateRange
     ),
     BottomNavItem(
         route = "one_call",
         titleRes = R.string.nav_one_call,
-        icon = Icons.Default.Api
+        icon = Icons.Default.Settings
     ),
     BottomNavItem(
         route = "air_pollution",
         titleRes = R.string.nav_air_pollution,
-        icon = Icons.Default.Air
+        icon = Icons.Default.Warning
     ),
     BottomNavItem(
         route = "geocoding",
@@ -142,6 +143,6 @@ val bottomNavItems = listOf(
     BottomNavItem(
         route = "weather_maps",
         titleRes = R.string.nav_weather_maps,
-        icon = Icons.Default.Map
+        icon = Icons.Default.Place
     )
 )

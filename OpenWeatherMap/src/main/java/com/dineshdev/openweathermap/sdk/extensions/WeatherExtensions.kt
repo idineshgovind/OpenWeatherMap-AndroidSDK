@@ -45,7 +45,9 @@ fun CurrentWeatherResponse.getFormattedTemperature(unit: String = "metric"): Str
  * Extension for CurrentWeatherResponse to get weather description.
  */
 fun CurrentWeatherResponse.getDescription(): String {
-    return weather.firstOrNull()?.description?.capitalize(Locale.getDefault()) ?: "Unknown"
+    return weather.firstOrNull()?.description?.replaceFirstChar { 
+        if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() 
+    } ?: "Unknown"
 }
 
 /**

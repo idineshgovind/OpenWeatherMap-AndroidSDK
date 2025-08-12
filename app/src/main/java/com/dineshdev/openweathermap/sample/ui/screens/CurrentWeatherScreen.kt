@@ -235,7 +235,7 @@ private fun CurrentWeatherCard(
             }
         }
         
-        Divider(modifier = Modifier.padding(vertical = 8.dp))
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         
         // Weather details
         InfoRow(
@@ -260,35 +260,35 @@ private fun CurrentWeatherCard(
             value = "${weatherData.wind.speed} m/s"
         )
         
-        weatherData.wind.degree?.let { degree ->
+        weatherData.wind.degrees?.let { degrees ->
             InfoRow(
                 label = stringResource(R.string.wind_direction),
-                value = "${degree}°"
+                value = "${degrees}°"
             )
         }
         
         InfoRow(
             label = stringResource(R.string.cloudiness),
-            value = "${weatherData.clouds.all}%"
+            value = "${weatherData.clouds.cloudiness}%"
         )
         
         // Sunrise/Sunset
-        Divider(modifier = Modifier.padding(vertical = 8.dp))
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         
         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
         
         InfoRow(
             label = stringResource(R.string.sunrise),
-            value = timeFormat.format(Date(weatherData.system.sunrise * 1000))
+            value = timeFormat.format(Date((weatherData.system.sunrise ?: 0L) * 1000))
         )
         
         InfoRow(
             label = stringResource(R.string.sunset),
-            value = timeFormat.format(Date(weatherData.system.sunset * 1000))
+            value = timeFormat.format(Date((weatherData.system.sunset ?: 0L) * 1000))
         )
         
         // Coordinates
-        Divider(modifier = Modifier.padding(vertical = 8.dp))
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         
         InfoRow(
             label = stringResource(R.string.coordinates),

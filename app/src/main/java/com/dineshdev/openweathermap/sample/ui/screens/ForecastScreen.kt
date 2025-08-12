@@ -224,7 +224,7 @@ private fun ForecastDataCard(
         forecastData.list.take(8).forEach { forecast ->
             ForecastItemRow(forecast = forecast)
             if (forecast != forecastData.list.take(8).last()) {
-                Divider(modifier = Modifier.padding(vertical = 4.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
             }
         }
         
@@ -307,7 +307,7 @@ private fun DailyForecastDataCard(
         dailyForecastData.list.forEach { dailyForecast ->
             DailyForecastItemRow(forecast = dailyForecast)
             if (dailyForecast != dailyForecastData.list.last()) {
-                Divider(modifier = Modifier.padding(vertical = 4.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
             }
         }
     }

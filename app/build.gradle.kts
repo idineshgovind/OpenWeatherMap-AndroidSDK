@@ -93,6 +93,11 @@ dependencies {
     // Logging
     implementation(libs.timber)
 
+    // Dependency injection (using manual singleton pattern instead of Dagger for simplicity)
+    // Dagger
+    // implementation("com.google.dagger:dagger:2.51.1")
+    // kapt("com.google.dagger:dagger-compiler:2.51.1")
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

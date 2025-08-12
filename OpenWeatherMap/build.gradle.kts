@@ -4,8 +4,8 @@ plugins {
     id("kotlin-parcelize")
     id("com.google.devtools.ksp") version "2.0.21-1.0.28"
     alias(libs.plugins.dokka)
-    `maven-publish`
-    signing
+    id("maven-publish")
+    id("signing")
 }
 
 android {
@@ -89,42 +89,42 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 }
 
-// Maven publishing configuration
+// Publishing configuration
 publishing {
     publications {
         register<MavenPublication>("release") {
-            groupId = "com.dineshdev"
-            artifactId = "openweathermap-sdk"
-            version = "1.0.0"
+            groupId = findProperty("GROUP")?.toString()
+            artifactId = findProperty("POM_ARTIFACT_ID")?.toString()
+            version = findProperty("VERSION_NAME")?.toString()
             
             afterEvaluate {
                 from(components["release"])
             }
             
             pom {
-                name.set("OpenWeatherMap Android SDK")
-                description.set("A comprehensive Android SDK for OpenWeatherMap API with full feature coverage")
-                url.set("https://github.com/dineshdev/openweathermap-android-sdk")
+                name.set(findProperty("POM_NAME")?.toString())
+                description.set(findProperty("POM_DESCRIPTION")?.toString())
+                url.set(findProperty("POM_URL")?.toString())
                 
                 licenses {
                     license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        name.set(findProperty("POM_LICENSE_NAME")?.toString())
+                        url.set(findProperty("POM_LICENSE_URL")?.toString())
                     }
                 }
                 
                 developers {
                     developer {
-                        id.set("dineshdev")
-                        name.set("Dinesh Developer")
-                        email.set("dev@dineshdev.com")
+                        id.set(findProperty("POM_DEVELOPER_ID")?.toString())
+                        name.set(findProperty("POM_DEVELOPER_NAME")?.toString())
+                        email.set(findProperty("POM_DEVELOPER_EMAIL")?.toString())
                     }
                 }
                 
                 scm {
-                    connection.set("scm:git:github.com/dineshdev/openweathermap-android-sdk.git")
-                    developerConnection.set("scm:git:ssh://github.com/dineshdev/openweathermap-android-sdk.git")
-                    url.set("https://github.com/dineshdev/openweathermap-android-sdk/tree/main")
+                    connection.set(findProperty("POM_SCM_CONNECTION")?.toString())
+                    developerConnection.set(findProperty("POM_SCM_DEV_CONNECTION")?.toString())
+                    url.set(findProperty("POM_SCM_URL")?.toString())
                 }
             }
         }
@@ -132,22 +132,22 @@ publishing {
     
     repositories {
         maven {
-            name = "sonatype"
-            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            name = "centralPortal"
+            url = uri("https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC")
             credentials {
-                username = findProperty("ossrhUsername") as String? ?: System.getenv("OSSRH_USERNAME")
-                password = findProperty("ossrhPassword") as String? ?: System.getenv("OSSRH_PASSWORD")
+                username = findProperty("SONATYPE_USERNAME")?.toString() ?: System.getenv("SONATYPE_USERNAME")
+                password = findProperty("SONATYPE_PASSWORD")?.toString() ?: System.getenv("SONATYPE_PASSWORD")
             }
         }
     }
 }
 
 signing {
-    val signingKey = findProperty("signingKey") as String? ?: System.getenv("SIGNING_KEY")
-    val signingPassword = findProperty("signingPassword") as String? ?: System.getenv("SIGNING_PASSWORD")
+    val signingKeyId = findProperty("signing.keyId")?.toString()
+    val signingPassword = findProperty("signing.password")?.toString()
     
-    if (signingKey != null && signingPassword != null) {
-        useInMemoryPgpKeys(signingKey, signingPassword)
+    if (signingKeyId != null && signingPassword != null) {
+        // Use GPG agent for signing instead of reading key file
         sign(publishing.publications["release"])
     }
 }

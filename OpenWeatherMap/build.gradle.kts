@@ -4,8 +4,8 @@ plugins {
     id("kotlin-parcelize")
     id("com.google.devtools.ksp") version "2.0.21-1.0.28"
     alias(libs.plugins.dokka)
-    id("maven-publish")
-    id("signing")
+    id("com.vanniktech.maven.publish")
+    id("com.gradleup.nmcp")
 }
 
 android {
@@ -48,13 +48,6 @@ android {
     buildFeatures {
         buildConfig = true
     }
-    
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-            withJavadocJar()
-        }
-    }
 }
 
 dependencies {
@@ -89,68 +82,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 }
 
-// Publishing configuration
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            groupId = findProperty("GROUP")?.toString()
-            artifactId = findProperty("POM_ARTIFACT_ID")?.toString()
-            version = findProperty("VERSION_NAME")?.toString()
-            
-            afterEvaluate {
-                from(components["release"])
-            }
-            
-            pom {
-                name.set(findProperty("POM_NAME")?.toString())
-                description.set(findProperty("POM_DESCRIPTION")?.toString())
-                url.set(findProperty("POM_URL")?.toString())
-                
-                licenses {
-                    license {
-                        name.set(findProperty("POM_LICENSE_NAME")?.toString())
-                        url.set(findProperty("POM_LICENSE_URL")?.toString())
-                    }
-                }
-                
-                developers {
-                    developer {
-                        id.set(findProperty("POM_DEVELOPER_ID")?.toString())
-                        name.set(findProperty("POM_DEVELOPER_NAME")?.toString())
-                        email.set(findProperty("POM_DEVELOPER_EMAIL")?.toString())
-                    }
-                }
-                
-                scm {
-                    connection.set(findProperty("POM_SCM_CONNECTION")?.toString())
-                    developerConnection.set(findProperty("POM_SCM_DEV_CONNECTION")?.toString())
-                    url.set(findProperty("POM_SCM_URL")?.toString())
-                }
-            }
-        }
-    }
-    
-    repositories {
-        maven {
-            name = "centralPortal"
-            url = uri("https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC")
-            credentials {
-                username = findProperty("SONATYPE_USERNAME")?.toString() ?: System.getenv("SONATYPE_USERNAME")
-                password = findProperty("SONATYPE_PASSWORD")?.toString() ?: System.getenv("SONATYPE_PASSWORD")
-            }
-        }
-    }
-}
-
-signing {
-    val signingKeyId = findProperty("signing.keyId")?.toString()
-    val signingPassword = findProperty("signing.password")?.toString()
-    
-    if (signingKeyId != null && signingPassword != null) {
-        // Use GPG agent for signing instead of reading key file
-        sign(publishing.publications["release"])
-    }
-}
+// The vanniktech plugin will handle all publishing configuration automatically
+// based on the properties in gradle.properties
 
 tasks.dokkaHtml.configure {
     outputDirectory.set(layout.buildDirectory.dir("dokka"))

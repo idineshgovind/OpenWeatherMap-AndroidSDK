@@ -13,6 +13,7 @@
 /captures
 .externalNativeBuild
 .cxx
+.kotlin
 local.properties
 
 # Maven Central sensitive properties - keep credentials secure

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-parcelize")
     id("com.google.devtools.ksp") version "2.0.21-1.0.28"
     alias(libs.plugins.dokka)
     `maven-publish`

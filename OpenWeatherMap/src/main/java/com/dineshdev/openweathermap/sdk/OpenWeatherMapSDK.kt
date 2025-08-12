@@ -8,6 +8,7 @@ import com.dineshdev.openweathermap.sdk.data.models.*
 import com.dineshdev.openweathermap.sdk.repository.WeatherRepository
 import com.dineshdev.openweathermap.sdk.utils.CacheManager
 import com.dineshdev.openweathermap.sdk.utils.NetworkUtils
+import com.dineshdev.openweathermap.sdk.utils.RateLimitManager
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
@@ -354,7 +355,7 @@ class OpenWeatherMapSDK private constructor(
                 try {
                     Result.Success(result.data.bytes())
                 } catch (e: Exception) {
-                    Result.Error(OpenWeatherException("Failed to read map tile", cause = e))
+                    Result.Error(ApiException("Failed to read map tile", -1, cause = e))
                 }
             }
             is Result.Error -> result
@@ -383,6 +384,35 @@ class OpenWeatherMapSDK private constructor(
      */
     fun getCacheSize(): Long {
         return cacheManager.getCacheSize()
+    }
+    
+    // ============== Rate Limit Management ==============
+    
+    /**
+     * Get current rate limit information.
+     * 
+     * @return RateLimitInfo if available, null otherwise
+     */
+    fun getRateLimitInfo(): RateLimitInfo? {
+        return RateLimitManager.getCurrentRateLimitInfo()
+    }
+    
+    /**
+     * Get rate limit status as a formatted string.
+     * 
+     * @return Human-readable rate limit status
+     */
+    fun getRateLimitStatus(): String {
+        return RateLimitManager.getStatusString()
+    }
+    
+    /**
+     * Check if rate limit is exceeded.
+     * 
+     * @return true if rate limit is exceeded
+     */
+    fun isRateLimitExceeded(): Boolean {
+        return RateLimitManager.isRateLimitExceeded()
     }
     
     // ============== Configuration ==============

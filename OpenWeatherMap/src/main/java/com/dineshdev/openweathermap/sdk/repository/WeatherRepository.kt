@@ -5,6 +5,7 @@ import com.dineshdev.openweathermap.sdk.config.OpenWeatherConfigProvider
 import com.dineshdev.openweathermap.sdk.data.models.*
 import com.dineshdev.openweathermap.sdk.utils.CacheManager
 import com.dineshdev.openweathermap.sdk.utils.NetworkUtils
+import com.dineshdev.openweathermap.sdk.utils.RateLimitManager
 import kotlinx.coroutines.delay
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -411,24 +412,58 @@ class WeatherRepository(
     ): Result<T> {
         var lastException: Exception? = null
         
-        repeat(config.maxRetryAttempts) { attempt ->
+        for (attempt in 0 until config.maxRetryAttempts) {
             try {
                 if (!NetworkUtils.isNetworkAvailable()) {
-                    return Result.Error(OpenWeatherException("No network connection"))
+                    return Result.Error(NetworkException("No network connection available"))
                 }
                 
                 val response = apiCall()
                 
+                // Extract rate limit info from headers
+                val rateLimitInfo = extractRateLimitInfo(response)
+                
                 if (response.isSuccessful) {
                     response.body()?.let { data ->
+                        // Store rate limit info if available
+                        rateLimitInfo?.let { RateLimitManager.updateRateLimitInfo(it) }
                         return Result.Success(data)
-                    } ?: return Result.Error(OpenWeatherException("Empty response body"))
+                    } ?: return Result.Error(ApiException("Empty response body", response.code()))
                 } else {
                     val errorMsg = response.errorBody()?.string() ?: "Unknown error"
-                    val exception = OpenWeatherException(errorMsg, response.code())
                     
-                    // Don't retry on client errors (4xx)
-                    if (response.code() in 400..499) {
+                    // Handle specific error codes
+                    val exception = when (response.code()) {
+                        401 -> InvalidApiKeyException("Invalid API key: $errorMsg")
+                        400 -> InvalidRequestException("Bad request: $errorMsg")
+                        404 -> ApiException("Resource not found: $errorMsg", 404)
+                        429 -> {
+                            // Rate limit exceeded
+                            val retryAfter = response.headers()["Retry-After"]?.toLongOrNull()
+                            RateLimitException(
+                                message = "Rate limit exceeded",
+                                retryAfter = retryAfter,
+                                limit = rateLimitInfo?.limit,
+                                remaining = rateLimitInfo?.remaining,
+                                reset = rateLimitInfo?.reset
+                            )
+                        }
+                        in 500..599 -> ApiException("Server error: $errorMsg", response.code())
+                        else -> ApiException(errorMsg, response.code())
+                    }
+                    
+                    // Don't retry on client errors (4xx) except rate limit
+                    if (response.code() in 400..499 && response.code() != 429) {
+                        return Result.Error(exception)
+                    }
+                    
+                    // For rate limit errors, wait if retry-after is provided
+                    if (response.code() == 429) {
+                        val retryAfter = response.headers()["Retry-After"]?.toLongOrNull()
+                        if (retryAfter != null && attempt < config.maxRetryAttempts - 1) {
+                            delay(retryAfter * 1000)
+                            continue
+                        }
                         return Result.Error(exception)
                     }
                     
@@ -436,20 +471,40 @@ class WeatherRepository(
                 }
             } catch (e: IOException) {
                 Timber.e(e, "Network error on attempt ${attempt + 1}")
-                lastException = OpenWeatherException("Network error: ${e.message}", cause = e)
+                lastException = NetworkException("Network error: ${e.message}", e)
             } catch (e: Exception) {
                 Timber.e(e, "Unexpected error on attempt ${attempt + 1}")
-                lastException = OpenWeatherException("Unexpected error: ${e.message}", cause = e)
+                lastException = ApiException("Unexpected error: ${e.message}", -1, cause = e)
             }
             
-            // Exponential backoff
+            // Exponential backoff for retries
             if (attempt < config.maxRetryAttempts - 1) {
                 val delayMs = (2.0.pow(attempt) * 1000).toLong()
                 delay(delayMs)
             }
         }
         
-        return Result.Error(lastException ?: OpenWeatherException("Max retry attempts reached"))
+        return Result.Error(lastException ?: ApiException("Max retry attempts reached", -1))
+    }
+    
+    /**
+     * Extract rate limit information from response headers.
+     */
+    private fun <T> extractRateLimitInfo(response: Response<T>): RateLimitInfo? {
+        return try {
+            val limit = response.headers()["X-RateLimit-Limit"]?.toIntOrNull()
+            val remaining = response.headers()["X-RateLimit-Remaining"]?.toIntOrNull()
+            val reset = response.headers()["X-RateLimit-Reset"]?.toLongOrNull()
+            
+            if (limit != null && remaining != null && reset != null) {
+                RateLimitInfo(limit, remaining, reset)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to extract rate limit info from headers")
+            null
+        }
     }
     
     /**

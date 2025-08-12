@@ -1,401 +1,317 @@
 # OpenWeatherMap Android SDK
 
-A comprehensive, easy-to-use Android SDK for the OpenWeatherMap API with full feature coverage, built with modern Android development best practices.
-
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
-[![API](https://img.shields.io/badge/API-21%2B-brightgreen.svg)](https://android-arsenal.com/api?level=21)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-orange.svg)](https://kotlinlang.org)
+A comprehensive Android SDK for integrating OpenWeatherMap API services into your Android applications. This repository includes both the SDK and a complete sample application demonstrating all available features.
 
 ## Features
 
-- ✅ **Complete API Coverage**: All OpenWeatherMap endpoints implemented
-- ✅ **Current Weather Data**: Get real-time weather information
-- ✅ **Forecasts**: 5-day/3-hour, 16-day daily, and hourly forecasts
-- ✅ **One Call API 3.0**: Comprehensive weather data in a single call
-- ✅ **Air Pollution**: Current, forecast, and historical air quality data
-- ✅ **Geocoding**: Direct and reverse geocoding support
-- ✅ **Weather Maps**: Tile-based weather map layers
-- ✅ **Smart Caching**: Automatic response caching with configurable expiration
-- ✅ **Retry Logic**: Automatic retry with exponential backoff
-- ✅ **Rate Limiting**: Built-in rate limit tracking and throttling
-- ✅ **Multi-language**: Support for 50+ languages
-- ✅ **All Units**: Metric, Imperial, and Standard (Kelvin)
-- ✅ **Java Compatible**: Full Java interoperability
-- ✅ **Coroutines Support**: First-class Kotlin coroutines integration
-- ✅ **Extension Functions**: Convenient Kotlin extensions for common operations
-- ✅ **Error Handling**: Comprehensive error handling with specific exception types
+The OpenWeatherMap Android SDK provides access to all major OpenWeatherMap API services:
 
-## Installation
+### ✅ Current Weather
+- Get current weather by city name
+- Get current weather by geographic coordinates
+- Get current weather by ZIP code
+- Get current weather by city ID
+- Bulk weather data for multiple cities
 
-### Gradle
+### ✅ Weather Forecast
+- 5-day forecast with 3-hour intervals
+- 16-day daily forecast
+- Hourly forecast (4 days)
 
-Add the following to your module's `build.gradle.kts`:
+### ✅ One Call API 3.0
+- Current weather
+- Minutely precipitation forecast
+- Hourly forecast (48 hours)
+- Daily forecast (8 days)
+- Weather alerts
+- Historical weather data
 
-```kotlin
-dependencies {
-    implementation("com.dineshdev:openweathermap-sdk:1.0.0")
-}
-```
+### ✅ Air Pollution
+- Current air pollution data
+- Air pollution forecast (5 days)
+- Historical air pollution data
 
-### Maven
+### ✅ Geocoding
+- Direct geocoding (location name to coordinates)
+- Reverse geocoding (coordinates to location name)
+- ZIP code geocoding
 
-```xml
-<dependency>
-    <groupId>com.dineshdev</groupId>
-    <artifactId>openweathermap-sdk</artifactId>
-    <version>1.0.0</version>
-</dependency>
-```
+### ✅ Weather Maps
+- Weather map tiles for various layers
+- Support for precipitation, clouds, pressure, temperature, and wind maps
+
+## Sample Application
+
+This repository includes a comprehensive sample application that demonstrates how to use all SDK features. The sample app serves as both documentation and a reference implementation for developers.
+
+### Sample App Features
+
+- **Clean Architecture**: Demonstrates MVVM pattern with ViewModels and repositories
+- **Modern UI**: Built with Jetpack Compose and Material Design 3
+- **Comprehensive Examples**: Shows usage of every SDK feature
+- **Error Handling**: Proper error states and loading indicators
+- **API Key Management**: Secure API key configuration via local.properties
+- **Professional Design**: Weather-themed UI with icons and intuitive navigation
 
 ## Quick Start
 
-### 1. Initialize the SDK
+### 1. Get Your API Key
 
-#### Kotlin
+1. Sign up at [OpenWeatherMap](https://openweathermap.org/api)
+2. Get your free API key from the dashboard
+
+### 2. Configure the Project
+
+1. Clone this repository:
+```bash
+git clone https://github.com/dineshdevkota001/OpenWeatherMap-Android-SDK.git
+cd OpenWeatherMap-Android-SDK
+```
+
+2. Copy the example configuration file:
+```bash
+cp local.properties.example local.properties
+```
+
+3. Edit `local.properties` and add your API key:
+```properties
+OPEN_WEATHER_API_KEY=your_actual_api_key_here
+```
+
+### 3. Run the Sample App
+
+1. Open the project in Android Studio
+2. Build and run the `app` module
+3. The sample app will start with all features ready to test
+
+## Using the SDK in Your Project
+
+### 1. Add Dependency
+
+Add the SDK module to your project or include it as a dependency:
+
+```kotlin
+dependencies {
+    implementation(project(":OpenWeatherMap"))
+    // Or when published to Maven Central:
+    // implementation("com.dineshdev.openweathermap:sdk:1.0.0")
+}
+```
+
+### 2. Initialize the SDK
+
+Initialize the SDK in your Application class:
 
 ```kotlin
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         
-        // Simple initialization with API key
-        OpenWeatherMapSDK.initialize(this, "YOUR_API_KEY")
-        
-        // Or with custom configuration
-        val config = SimpleConfigProvider(
-            apiKey = "YOUR_API_KEY",
-            units = Units.METRIC,
-            language = "en",
-            enableLogging = BuildConfig.DEBUG,
-            cacheExpirationMinutes = 10
+        // Initialize OpenWeatherMap SDK
+        OpenWeatherMapSDK.initialize(
+            context = this,
+            config = SimpleConfigProvider(
+                apiKey = "YOUR_API_KEY",
+                units = Units.METRIC,
+                language = "en"
+            )
         )
-        OpenWeatherMapSDK.initialize(this, config)
     }
 }
 ```
 
-#### Java
-
-```java
-public class MyApplication extends Application {
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        
-        // Simple initialization
-        OpenWeatherMapSDK.initialize(this, "YOUR_API_KEY");
-        
-        // Or with custom configuration
-        SimpleConfigProvider config = new SimpleConfigProvider(
-            "YOUR_API_KEY",
-            "https://api.openweathermap.org/",
-            Units.METRIC,
-            "en",
-            BuildConfig.DEBUG,
-            10,
-            30L,
-            3
-        );
-        OpenWeatherMapSDK.initialize(this, config);
-    }
-}
-```
-
-### 2. Get Current Weather
-
-#### Kotlin
+### 3. Use the SDK
 
 ```kotlin
-class WeatherViewModel : ViewModel() {
-    private val weatherSDK = OpenWeatherMapSDK.getInstance()
+class WeatherRepository {
+    private val sdk = OpenWeatherMapSDK.getInstance()
     
-    fun getCurrentWeather(city: String) {
-        viewModelScope.launch {
-            weatherSDK.getCurrentWeatherByCityName(city)
-                .onSuccess { weather ->
-                    // Handle success
-                    Log.d("Weather", "Temperature: ${weather.main.temperature}°")
-                    Log.d("Weather", "Description: ${weather.weather.first().description}")
-                }
-                .onError { exception ->
-                    // Handle error
-                    when (exception) {
-                        is RateLimitException -> {
-                            Log.e("Weather", "Rate limit exceeded. Retry after: ${exception.retryAfter}s")
-                        }
-                        is NetworkException -> {
-                            Log.e("Weather", "Network error: ${exception.message}")
-                        }
-                        is InvalidApiKeyException -> {
-                            Log.e("Weather", "Invalid API key")
-                        }
-                        else -> {
-                            Log.e("Weather", "Error: ${exception.message}")
-                        }
-                    }
-                }
-        }
+    suspend fun getCurrentWeather(cityName: String): Result<CurrentWeatherResponse> {
+        return sdk.getCurrentWeatherByCityName(cityName)
     }
 }
 ```
 
-#### Java
+## SDK Configuration
 
-```java
-public class WeatherActivity extends AppCompatActivity {
-    private OpenWeatherMapSDK weatherSDK = OpenWeatherMapSDK.getInstance();
-    
-    private void getCurrentWeather(String city) {
-        // Using coroutines from Java (requires kotlinx-coroutines-android)
-        BuildersKt.launch(
-            GlobalScope.INSTANCE,
-            Dispatchers.getMain(),
-            CoroutineStart.DEFAULT,
-            (scope, continuation) -> {
-                Object result = weatherSDK.getCurrentWeatherByCityName(
-                    city, null, null, continuation
-                );
-                
-                if (result instanceof Result.Success) {
-                    CurrentWeatherResponse weather = ((Result.Success<CurrentWeatherResponse>) result).getData();
-                    Log.d("Weather", "Temperature: " + weather.getMain().getTemperature());
-                } else if (result instanceof Result.Error) {
-                    Exception error = ((Result.Error) result).getException();
-                    Log.e("Weather", "Error: " + error.getMessage());
-                }
-                return Unit.INSTANCE;
-            }
-        );
-    }
-}
-```
-
-## API Usage Examples
-
-### Units and Languages
-
-The SDK supports all OpenWeatherMap units and languages:
+The SDK supports extensive configuration options:
 
 ```kotlin
-// Configure default units and language
 val config = SimpleConfigProvider(
     apiKey = "YOUR_API_KEY",
-    units = Units.METRIC,        // METRIC (°C), IMPERIAL (°F), STANDARD (K)
-    language = "es"               // Spanish (50+ languages supported)
+    baseUrl = "https://api.openweathermap.org/",  // Custom base URL
+    units = Units.METRIC,                          // STANDARD, METRIC, IMPERIAL
+    language = "en",                               // Language code
+    enableLogging = BuildConfig.DEBUG,            // Enable debug logging
+    cacheExpirationMinutes = 10,                  // Cache duration
+    networkTimeoutSeconds = 30L,                  // Network timeout
+    maxRetryAttempts = 3                          // Retry attempts
 )
-
-// Or override per request
-val query = WeatherQuery(
-    cityName = "Madrid",
-    units = "metric",
-    language = "es"
-)
-val weather = weatherSDK.getCurrentWeather(query)
 ```
 
-Supported languages include: `en`, `es`, `fr`, `de`, `it`, `pt`, `ru`, `ja`, `ko`, `zh_cn`, `ar`, `hi`, and many more.
+## Architecture
+
+### SDK Architecture
+- **Repository Pattern**: Clean separation of data access logic
+- **Retrofit**: HTTP client for API communication
+- **Moshi**: JSON serialization/deserialization
+- **Coroutines**: Asynchronous programming support
+- **Caching**: Built-in response caching
+- **Rate Limiting**: Automatic rate limit handling
+- **Error Handling**: Comprehensive error types and handling
+
+### Sample App Architecture
+- **MVVM**: Model-View-ViewModel pattern
+- **Clean Architecture**: Separation of concerns
+- **Jetpack Compose**: Modern declarative UI
+- **StateFlow**: Reactive state management
+- **Navigation**: Type-safe navigation between screens
+
+## API Examples
 
 ### Current Weather
-
 ```kotlin
 // By city name
-val result = weatherSDK.getCurrentWeatherByCityName("London", "GB")
+val result = sdk.getCurrentWeatherByCityName("London", "GB")
 
 // By coordinates
-val result = weatherSDK.getCurrentWeatherByCoordinates(51.5074, -0.1278)
+val result = sdk.getCurrentWeatherByCoordinates(51.5074, -0.1278)
 
 // By ZIP code
-val result = weatherSDK.getCurrentWeatherByZipCode("10001", "US")
-
-// By city ID
-val result = weatherSDK.getCurrentWeatherByCityId(2172797)
+val result = sdk.getCurrentWeatherByZipCode("10001", "US")
 ```
 
-### Rate Limit Handling
-
-The SDK automatically tracks and handles rate limits:
-
+### Forecast
 ```kotlin
-// Check current rate limit status
-val rateLimitInfo = weatherSDK.getRateLimitInfo()
-if (rateLimitInfo != null) {
-    Log.d("RateLimit", "Remaining calls: ${rateLimitInfo.remaining}/${rateLimitInfo.limit}")
-    Log.d("RateLimit", "Resets in: ${rateLimitInfo.getSecondsUntilReset()}s")
-}
+// 5-day forecast
+val forecast = sdk.getForecastByCityName("London")
 
-// Handle rate limit errors
-weatherResult.onError { exception ->
-    if (exception is RateLimitException) {
-        // SDK automatically handles retry-after delays
-        Log.e("API", "Rate limited. Retry after: ${exception.retryAfter}s")
-    }
-}
+// Daily forecast
+val dailyForecast = sdk.getDailyForecastByCityName("London", days = 7)
 ```
 
-## Caching Details
-
-The SDK includes an intelligent caching system:
-
-### Cache Storage
-- **Type**: SharedPreferences-based persistent disk cache
-- **Location**: App's private SharedPreferences
-- **Format**: JSON serialized with Moshi
-
-### Cache Configuration
+### One Call API
 ```kotlin
-val config = SimpleConfigProvider(
-    apiKey = "YOUR_API_KEY",
-    cacheExpirationMinutes = 10  // Default: 10 minutes
+// Comprehensive weather data
+val oneCall = sdk.getOneCallData(
+    latitude = 51.5074,
+    longitude = -0.1278,
+    exclude = listOf("minutely", "alerts")
+)
+
+// Historical data
+val historical = sdk.getHistoricalWeather(
+    latitude = 51.5074,
+    longitude = -0.1278,
+    timestamp = System.currentTimeMillis() / 1000 - 86400 // Yesterday
 )
 ```
 
-### Offline Behavior
-- When network is unavailable, cached data is returned if not expired
-- Each endpoint has unique cache keys based on request parameters
-- Cache is automatically cleaned of expired entries
-
-### Cache Management
+### Air Pollution
 ```kotlin
-// Clear all cache
-weatherSDK.clearCache()
+// Current air pollution
+val airPollution = sdk.getCurrentAirPollution(51.5074, -0.1278)
 
-// Clean expired cache entries
-weatherSDK.cleanExpiredCache()
+// Air pollution forecast
+val forecast = sdk.getAirPollutionForecast(51.5074, -0.1278)
+```
 
-// Get cache size in bytes
-val cacheSize = weatherSDK.getCacheSize()
-Log.d("Cache", "Current cache size: ${cacheSize / 1024} KB")
+### Geocoding
+```kotlin
+// Get coordinates from location name
+val locations = sdk.getCoordinatesByLocationName("London, UK")
+
+// Get location name from coordinates
+val locations = sdk.getLocationNameByCoordinates(51.5074, -0.1278)
 ```
 
 ## Error Handling
 
-The SDK provides specific exception types for different error scenarios:
+The SDK provides comprehensive error handling:
 
 ```kotlin
-when (val result = weatherSDK.getCurrentWeatherByCityName("London")) {
+when (val result = sdk.getCurrentWeatherByCityName("London")) {
     is Result.Success -> {
         val weather = result.data
         // Handle success
     }
     is Result.Error -> {
-        when (val exception = result.exception) {
-            is NetworkException -> {
-                // No network connection, timeout, etc.
-                showError("Network error: ${exception.message}")
-            }
-            is RateLimitException -> {
-                // Rate limit exceeded
-                showError("Rate limited. Retry after ${exception.retryAfter}s")
-                showRateLimitInfo(exception.limit, exception.remaining, exception.reset)
-            }
-            is InvalidApiKeyException -> {
-                // Invalid or missing API key
-                showError("Invalid API key. Please check your configuration.")
-            }
-            is InvalidRequestException -> {
-                // Bad request parameters
-                showError("Invalid request: ${exception.message}")
-            }
-            is ApiException -> {
-                // General API error with HTTP code
-                showError("API error (${exception.code}): ${exception.message}")
-            }
-            else -> {
-                // Other errors
-                showError("Unexpected error: ${exception.message}")
-            }
+        val error = result.exception
+        when (error) {
+            is NetworkException -> // Handle network errors
+            is ApiException -> // Handle API errors
+            is RateLimitException -> // Handle rate limit errors
+            else -> // Handle other errors
         }
     }
     Result.Loading -> {
-        // Show loading state
-        showLoading()
+        // Handle loading state
     }
 }
-```
-
-## Data Models
-
-All data models are:
-- Kotlin data classes
-- Parcelable for Android state preservation
-- Null-safe with sensible defaults
-- Annotated with Moshi for JSON parsing
-
-Example:
-```kotlin
-@Parcelize
-@JsonClass(generateAdapter = true)
-data class CurrentWeatherResponse(
-    @Json(name = "coord") val coordinates: Coordinates,
-    @Json(name = "weather") val weather: List<WeatherDescription>,
-    // ... other fields
-) : Parcelable
-```
-
-## Extension Functions
-
-The SDK provides convenient extension functions for common operations:
-
-```kotlin
-// Temperature formatting
-val tempString = weather.main.temperature.toTemperatureString("metric") // "20°C"
-
-// Date/time formatting
-val dateString = weather.timestamp.toFormattedDate() // "Jan 15, 2024 14:30"
-val timeString = weather.system.sunrise?.toTimeString() // "06:45"
-
-// Weather checks
-if (weather.weather.isRaining()) {
-    // Show rain UI
-}
-
-// Air quality
-val colorCode = airPollution.list.first().main.getColorCode() // "#00E400" for good
-
-// Result handling
-weatherResult
-    .onSuccess { data -> /* Handle success */ }
-    .onError { error -> /* Handle error */ }
-    .onLoading { /* Show loading */ }
-
-val weather = weatherResult.getOrNull()
-```
-
-## ProGuard Rules
-
-The SDK includes consumer ProGuard rules that are automatically applied. If you need additional rules:
-
-```proguard
-# OpenWeatherMap SDK
--keep class com.dineshdev.openweathermap.sdk.** { *; }
--keep class com.dineshdev.openweathermap.sdk.data.models.** { *; }
 ```
 
 ## Requirements
 
-- Android API 21+ (Android 5.0+)
-- Kotlin 1.9.0+
-- Internet permission (automatically included)
+- **Minimum SDK**: 21 (Android 5.0)
+- **Target SDK**: 36 (Android 14)
+- **Kotlin**: 2.0.21+
+- **Android Gradle Plugin**: 8.10.1+
+
+## Dependencies
+
+### SDK Dependencies
+- Retrofit 2.9.0
+- Moshi 1.15.0
+- OkHttp 4.12.0
+- Kotlin Coroutines 1.7.3
+- Timber 5.0.1
+
+### Sample App Additional Dependencies
+- Jetpack Compose (BOM 2024.09.00)
+- Navigation Compose 2.9.0
+- ViewModel Compose 2.9.2
+- Coil 2.7.0 (for image loading)
+- Material Design 3
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## Testing
 
-The SDK includes comprehensive unit tests using MockWebServer. To run tests:
+The SDK includes comprehensive unit tests and integration tests. The sample app serves as an end-to-end testing platform.
 
+To run tests:
 ```bash
-./gradlew :OpenWeatherMap:test
+./gradlew test
+./gradlew connectedAndroidTest
 ```
+
+## Documentation
+
+- **API Documentation**: Generated with Dokka
+- **Sample App**: Live documentation of all features
+- **Code Comments**: Comprehensive inline documentation
+- **README**: This file with quick start and examples
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
-For issues, questions, or suggestions, please [create an issue](https://github.com/dineshdev/openweathermap-android-sdk/issues).
+- **Issues**: [GitHub Issues](https://github.com/dineshdevkota001/OpenWeatherMap-Android-SDK/issues)
+- **OpenWeatherMap API**: [Official Documentation](https://openweathermap.org/api)
+- **Android Development**: [Android Developer Guides](https://developer.android.com/guide)
 
-## Author
+## Changelog
 
-**Dinesh Developer**
-- Email: dev@dineshdev.com
-- GitHub: [@dineshdev](https://github.com/dineshdev)
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
+
+---
+
+**Built with ❤️ for the Android developer community**

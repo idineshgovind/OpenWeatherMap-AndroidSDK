@@ -57,7 +57,8 @@ class OpenWeatherMapSDK private constructor(
     init {
         NetworkUtils.init(context)
         
-        if (config.enableLogging && BuildConfig.DEBUG) {
+        // Enable Timber logging if configured
+        if (config.enableLogging) {
             Timber.plant(Timber.DebugTree())
         }
         
@@ -414,11 +415,7 @@ class OpenWeatherMapSDK private constructor(
             val loggingInterceptor = HttpLoggingInterceptor { message ->
                 Timber.tag("OkHttp").d(message)
             }.apply {
-                level = if (BuildConfig.DEBUG) {
-                    HttpLoggingInterceptor.Level.BODY
-                } else {
-                    HttpLoggingInterceptor.Level.BASIC
-                }
+                level = HttpLoggingInterceptor.Level.BODY
             }
             builder.addInterceptor(loggingInterceptor)
         }
@@ -427,7 +424,7 @@ class OpenWeatherMapSDK private constructor(
         builder.addInterceptor { chain ->
             val original = chain.request()
             val request = original.newBuilder()
-                .header("User-Agent", "OpenWeatherMapSDK-Android/${BuildConfig.SDK_VERSION}")
+                .header("User-Agent", "OpenWeatherMapSDK-Android/1.0.0")
                 .method(original.method, original.body)
                 .build()
             chain.proceed(request)

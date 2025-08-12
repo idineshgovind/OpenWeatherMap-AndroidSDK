@@ -30,7 +30,7 @@ class WeatherRepository(
         val cacheKey = "current_weather_${query.hashCode()}"
         
         // Check cache first
-        cacheManager.get<CurrentWeatherResponse>(cacheKey)?.let { cached ->
+        cacheManager.get(cacheKey, CurrentWeatherResponse::class.java)?.let { cached ->
             Timber.d("Returning cached current weather")
             return Result.Success(cached)
         }
@@ -86,7 +86,7 @@ class WeatherRepository(
             }
         }.also { result ->
             if (result is Result.Success) {
-                cacheManager.put(cacheKey, result.data, config.cacheExpirationMinutes)
+                cacheManager.put(cacheKey, result.data, CurrentWeatherResponse::class.java, config.cacheExpirationMinutes)
             }
         }
     }
@@ -142,7 +142,7 @@ class WeatherRepository(
     ): Result<ForecastResponse> {
         val cacheKey = "forecast_${query.hashCode()}_$count"
         
-        cacheManager.get<ForecastResponse>(cacheKey)?.let { cached ->
+        cacheManager.get(cacheKey, ForecastResponse::class.java)?.let { cached ->
             Timber.d("Returning cached forecast")
             return Result.Success(cached)
         }
@@ -192,7 +192,7 @@ class WeatherRepository(
             }
         }.also { result ->
             if (result is Result.Success) {
-                cacheManager.put(cacheKey, result.data, config.cacheExpirationMinutes)
+                cacheManager.put(cacheKey, result.data, ForecastResponse::class.java, config.cacheExpirationMinutes)
             }
         }
     }
@@ -206,7 +206,7 @@ class WeatherRepository(
     ): Result<DailyForecastResponse> {
         val cacheKey = "daily_forecast_${query.hashCode()}_$days"
         
-        cacheManager.get<DailyForecastResponse>(cacheKey)?.let { cached ->
+        cacheManager.get(cacheKey, DailyForecastResponse::class.java)?.let { cached ->
             return Result.Success(cached)
         }
         
@@ -236,7 +236,7 @@ class WeatherRepository(
             }
         }.also { result ->
             if (result is Result.Success) {
-                cacheManager.put(cacheKey, result.data, config.cacheExpirationMinutes)
+                cacheManager.put(cacheKey, result.data, DailyForecastResponse::class.java, config.cacheExpirationMinutes)
             }
         }
     }
@@ -256,7 +256,7 @@ class WeatherRepository(
         val excludeStr = exclude?.joinToString(",")
         val cacheKey = "onecall_${latitude}_${longitude}_$excludeStr"
         
-        cacheManager.get<OneCallResponse>(cacheKey)?.let { cached ->
+        cacheManager.get(cacheKey, OneCallResponse::class.java)?.let { cached ->
             return Result.Success(cached)
         }
         
@@ -271,7 +271,7 @@ class WeatherRepository(
             )
         }.also { result ->
             if (result is Result.Success) {
-                cacheManager.put(cacheKey, result.data, config.cacheExpirationMinutes)
+                cacheManager.put(cacheKey, result.data, OneCallResponse::class.java, config.cacheExpirationMinutes)
             }
         }
     }
@@ -309,7 +309,7 @@ class WeatherRepository(
     ): Result<AirPollutionResponse> {
         val cacheKey = "air_pollution_${latitude}_$longitude"
         
-        cacheManager.get<AirPollutionResponse>(cacheKey)?.let { cached ->
+        cacheManager.get(cacheKey, AirPollutionResponse::class.java)?.let { cached ->
             return Result.Success(cached)
         }
         
@@ -317,7 +317,7 @@ class WeatherRepository(
             apiService.getCurrentAirPollution(latitude, longitude, config.apiKey)
         }.also { result ->
             if (result is Result.Success) {
-                cacheManager.put(cacheKey, result.data, config.cacheExpirationMinutes)
+                cacheManager.put(cacheKey, result.data, AirPollutionResponse::class.java, config.cacheExpirationMinutes)
             }
         }
     }

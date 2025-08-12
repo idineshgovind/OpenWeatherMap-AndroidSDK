@@ -3,9 +3,7 @@ package com.dineshdev.openweathermap.sdk.utils
 import android.content.Context
 import android.content.SharedPreferences
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import timber.log.Timber
-import java.lang.reflect.Type
 
 /**
  * Simple cache manager using SharedPreferences for caching API responses.
@@ -20,11 +18,11 @@ class CacheManager(context: Context, private val moshi: Moshi) {
     /**
      * Store data in cache with expiration time.
      */
-    inline fun <reified T> put(key: String, data: T, expirationMinutes: Int) {
+    fun <T> put(key: String, data: T, clazz: Class<T>, expirationMinutes: Int) {
         if (expirationMinutes <= 0) return
         
         try {
-            val adapter = moshi.adapter(T::class.java)
+            val adapter = moshi.adapter(clazz)
             val json = adapter.toJson(data)
             val expirationTime = System.currentTimeMillis() + (expirationMinutes * 60 * 1000)
             
@@ -42,7 +40,7 @@ class CacheManager(context: Context, private val moshi: Moshi) {
     /**
      * Retrieve data from cache if not expired.
      */
-    inline fun <reified T> get(key: String): T? {
+    fun <T> get(key: String, clazz: Class<T>): T? {
         try {
             val expirationTime = prefs.getLong("${key}_expiry", 0)
             
@@ -53,7 +51,7 @@ class CacheManager(context: Context, private val moshi: Moshi) {
             }
             
             val json = prefs.getString(key, null) ?: return null
-            val adapter = moshi.adapter(T::class.java)
+            val adapter = moshi.adapter(clazz)
             
             return adapter.fromJson(json).also {
                 Timber.d("Retrieved cached data for key: $key")
@@ -126,4 +124,15 @@ class CacheManager(context: Context, private val moshi: Moshi) {
             Timber.d("Cleaned ${keysToRemove.size / 2} expired cache entries")
         }
     }
+}
+
+/**
+ * Extension functions for easier usage with reified types.
+ */
+inline fun <reified T> CacheManager.putTyped(key: String, data: T, expirationMinutes: Int) {
+    put(key, data, T::class.java, expirationMinutes)
+}
+
+inline fun <reified T> CacheManager.getTyped(key: String): T? {
+    return get(key, T::class.java)
 }

@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.kapt)
+    id("com.google.devtools.ksp") version "2.0.21-1.0.28"
     alias(libs.plugins.dokka)
     `maven-publish`
     signing
@@ -69,7 +69,7 @@ dependencies {
     // JSON Parsing
     api(libs.moshi)
     api(libs.moshi.kotlin)
-    kapt(libs.moshi.codegen)
+    ksp(libs.moshi.codegen)
     
     // Coroutines
     api(libs.kotlinx.coroutines.core)

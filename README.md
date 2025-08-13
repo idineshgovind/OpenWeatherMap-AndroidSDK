@@ -64,8 +64,8 @@ This repository includes a comprehensive sample application that demonstrates ho
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/dineshdevkota001/OpenWeatherMap-Android-SDK.git
-cd OpenWeatherMap-Android-SDK
+git clone https://github.com/idineshgovind/OpenWeatherMap-AndroidSDK.git
+cd OpenWeatherMap-AndroidSDK
 ```
 
 2. Copy the example configuration file:
@@ -92,10 +92,9 @@ Add the SDK module to your project or include it as a dependency:
 
 ```kotlin
 dependencies {
-    implementation(project(":OpenWeatherMap"))
-    // Or when published to Maven Central:
-    // implementation("com.dineshdev.openweathermap:sdk:1.0.0")
+    implementation("com.dineshdev.openweathermap:sdk:1.0.0")
 }
+```
 ```
 
 ### 2. Initialize the SDK
@@ -281,16 +280,6 @@ when (val result = sdk.getCurrentWeatherByCityName("London")) {
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## Testing
-
-The SDK includes comprehensive unit tests and integration tests. The sample app serves as an end-to-end testing platform.
-
-To run tests:
-```bash
-./gradlew test
-./gradlew connectedAndroidTest
-```
-
 ## Documentation
 
 - **API Documentation**: Generated with Dokka
@@ -304,7 +293,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/dineshdevkota001/OpenWeatherMap-Android-SDK/issues)
+- **Issues**: [GitHub Issues](https://github.com/idineshgovind/OpenWeatherMap-AndroidSDK/issues)
 - **OpenWeatherMap API**: [Official Documentation](https://openweathermap.org/api)
 - **Android Development**: [Android Developer Guides](https://developer.android.com/guide)
 

@@ -1,3 +1,6 @@
+import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -6,6 +9,7 @@ plugins {
     alias(libs.plugins.dokka)
     id("com.vanniktech.maven.publish")
     id("com.gradleup.nmcp")
+    signing
 }
 
 android {
@@ -82,8 +86,59 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 }
 
-// The vanniktech plugin will handle all publishing configuration automatically
-// based on the properties in gradle.properties
+// Explicit GPG signing configuration using gpg command
+signing {
+    useGpgCmd()
+    sign(publishing.publications)
+}
+
+// Configure Maven publishing with Central Portal
+mavenPublishing {
+    // Use Maven Central Portal for publishing
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+    
+    // Enable signing for all publications
+    signAllPublications()
+    
+    // Configure what to publish for Android library
+    configure(
+        AndroidSingleVariantLibrary(
+            variant = "release",
+            sourcesJar = true,
+            publishJavadocJar = true
+        )
+    )
+    
+    // Configure POM details (will read from gradle.properties but can be overridden)
+    pom {
+        name.set("OpenWeatherMap Android SDK")
+        description.set("A comprehensive Android SDK for OpenWeatherMap API with full feature coverage including current weather, forecasts, air pollution, geocoding, and weather maps")
+        inceptionYear.set("2025")
+        url.set("https://github.com/idineshgovind/OpenWeatherMap-AndroidSDK")
+        
+        licenses {
+            license {
+                name.set("The Apache Software License, Version 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("repo")
+            }
+        }
+        
+        developers {
+            developer {
+                id.set("idineshgovind")
+                name.set("Dinesh G")
+                url.set("https://github.com/idineshgovind")
+            }
+        }
+        
+        scm {
+            url.set("https://github.com/idineshgovind/OpenWeatherMap-AndroidSDK")
+            connection.set("scm:git:git://github.com/idineshgovind/OpenWeatherMap-AndroidSDK.git")
+            developerConnection.set("scm:git:ssh://git@github.com/idineshgovind/OpenWeatherMap-AndroidSDK.git")
+        }
+    }
+}
 
 tasks.dokkaHtml.configure {
     outputDirectory.set(layout.buildDirectory.dir("dokka"))

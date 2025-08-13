@@ -92,7 +92,7 @@ Add the SDK module to your project or include it as a dependency:
 
 ```kotlin
 dependencies {
-    implementation("com.dineshdev.openweathermap:sdk:1.0.0")
+    implementation("com.dineshdev.openweathermap-sdk:1.0.0")
 }
 ```
 ```
